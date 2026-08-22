@@ -45,9 +45,13 @@ be connected to Lovable Cloud or Supabase before launch.
 - Do not commit original video masters to GitHub.
 - Replace placeholder category images with final thumbnails before launch.
 
-## Lovable workflow
+## GitHub Pages deployment
 
-Lovable cannot import an existing GitHub repository as a new Lovable project.
-Create the Lovable project first, connect it to GitHub, then copy this code into
-the repository Lovable creates. See `LOVABLE_SETUP.md`.
+The included GitHub Actions workflow builds the site and deploys `dist` to
+GitHub Pages on every push to `main`. In the repository settings, enable Pages
+with **GitHub Actions** as the source. The site uses hash routing so it works
+both at the project URL and later behind a custom domain.
 
+The public portfolio is static. The current admin preview stores edits in the
+browser; a shared production CMS requires Supabase (or another external
+backend) because GitHub Pages does not execute server-side code.

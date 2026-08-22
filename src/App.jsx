@@ -8,7 +8,7 @@ import {
   useNavigate,
   useParams,
 } from "react-router-dom";
-import { categories, initialProjects, services } from "./data";
+import { ASSET_BASE, categories, initialProjects, services } from "./data";
 
 const ADMIN_EMAIL = "dainguyen.freelance@gmail.com";
 const PROJECTS_KEY = "dai-nguyen-portfolio-projects-v1";
@@ -86,7 +86,7 @@ function Header() {
   return (
     <header className="site-header">
       <Link className="brand" to="/" aria-label="Dai Nguyen home">
-        <img src="/assets/logo.png" alt="Dai Nguyen" />
+        <img src={`${ASSET_BASE}/logo.png`} alt="Dai Nguyen" />
       </Link>
       <button className="menu-button" onClick={() => setOpen(!open)} aria-label="Toggle menu">
         <Icon name={open ? "close" : "menu"} />
@@ -173,7 +173,7 @@ function Home({ projects }) {
           </div>
         </div>
         <Link className="hero-visual" to="/work/samsung-voices-of-galaxy">
-          <img src="/assets/case-study.png" alt="Selected campaign work by Dai Nguyen" />
+          <img src={`${ASSET_BASE}/case-study.png`} alt="Selected campaign work by Dai Nguyen" />
           <div className="hero-visual-overlay">
             <span className="play-button large"><Icon name="play" size={32} /></span>
             <div>
@@ -359,7 +359,7 @@ function About() {
           <Link className="button" to="/work">View my work <Icon name="arrow" /></Link>
         </div>
         <div className="portrait-frame">
-          <img src="/assets/dai-nguyen-portrait.png" alt="Dai Nguyen, video editor" />
+          <img src={`${ASSET_BASE}/dai-nguyen-portrait.png`} alt="Dai Nguyen, video editor" />
         </div>
       </section>
       <section className="about-panels">
@@ -448,7 +448,7 @@ function Admin({ projects, setProjects }) {
     return (
       <section className="admin-login">
         <div className="admin-login-card">
-          <img src="/assets/logo.png" alt="Dai Nguyen" />
+          <img src={`${ASSET_BASE}/logo.png`} alt="Dai Nguyen" />
           <span className="eyebrow">Portfolio CMS preview</span>
           <h1>Admin access</h1>
           <p>Use the configured admin email to open the local content manager.</p>
@@ -471,7 +471,7 @@ function Admin({ projects, setProjects }) {
       client: "Prodigious, Publicis Groupe",
       year: new Date().getFullYear().toString(),
       role: "",
-      image: "/assets/case-study.png",
+      image: `${ASSET_BASE}/case-study.png`,
       videoUrl: "",
       featured: false,
       published: false,
@@ -503,7 +503,7 @@ function Admin({ projects, setProjects }) {
   return (
     <section className="admin-shell">
       <aside className="admin-sidebar">
-        <img src="/assets/logo.png" alt="Dai Nguyen" />
+        <img src={`${ASSET_BASE}/logo.png`} alt="Dai Nguyen" />
         <div>
           <span className="eyebrow">CMS preview</span>
           <h2>Portfolio admin</h2>
