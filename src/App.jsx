@@ -12,6 +12,12 @@ import { ASSET_BASE, categories, initialProjects, services } from "./data";
 
 const ADMIN_EMAIL = "dainguyen.freelance@gmail.com";
 const PROJECTS_KEY = "dai-nguyen-portfolio-projects-v1";
+const SHOWREEL_KEY = "dai-nguyen-portfolio-showreel-v1";
+const defaultShowreel = {
+  title: "Showreel",
+  videoUrl: "",
+  image: `${ASSET_BASE}/case-study.png`,
+};
 
 function Icon({ name, size = 20 }) {
   const paths = {
@@ -61,6 +67,63 @@ function useProjects() {
   }, [projects]);
 
   return [projects, setProjects];
+}
+
+function useShowreel() {
+  const [showreel, setShowreel] = useState(() => {
+    try {
+      const stored = localStorage.getItem(SHOWREEL_KEY);
+      return stored ? { ...defaultShowreel, ...JSON.parse(stored) } : defaultShowreel;
+    } catch {
+      return defaultShowreel;
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem(SHOWREEL_KEY, JSON.stringify(showreel));
+  }, [showreel]);
+
+  return [showreel, setShowreel];
+}
+
+function getYouTubeId(url) {
+  if (!url) return "";
+  const match = url.match(
+    /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{11})/,
+  );
+  return match?.[1] || "";
+}
+
+function ShowreelPlayer({ showreel }) {
+  const videoId = getYouTubeId(showreel.videoUrl);
+  if (!videoId) {
+    return (
+      <div className="showreel-placeholder">
+        <img src={showreel.image} alt="Showreel placeholder frame" />
+        <span className="placeholder-label">Add the YouTube URL in Admin</span>
+      </div>
+    );
+  }
+
+  const params = new URLSearchParams({
+    autoplay: "1",
+    controls: "1",
+    loop: "1",
+    mute: "1",
+    playsinline: "1",
+    playlist: videoId,
+    rel: "0",
+  });
+
+  return (
+    <iframe
+      className="showreel-embed"
+      src={`https://www.youtube-nocookie.com/embed/${videoId}?${params.toString()}`}
+      title={showreel.title}
+      allow="autoplay; encrypted-media; picture-in-picture"
+      allowFullScreen
+    />
+  );
 }
 
 function ScrollToTop() {
@@ -148,7 +211,7 @@ function ProjectCard({ project }) {
   );
 }
 
-function Home({ projects }) {
+function Home({ projects, showreel }) {
   const featured = projects.filter((project) => project.published && project.featured).slice(0, 4);
   return (
     <>
@@ -172,16 +235,15 @@ function Home({ projects }) {
             <div><strong>Global</strong><span>remote collaboration</span></div>
           </div>
         </div>
-        <Link className="hero-visual" to="/work/samsung-voices-of-galaxy">
-          <img src={`${ASSET_BASE}/case-study.png`} alt="Selected campaign work by Dai Nguyen" />
+        <section className="hero-visual" aria-label={`${showreel.title} player`}>
+          <ShowreelPlayer showreel={showreel} />
           <div className="hero-visual-overlay">
-            <span className="play-button large"><Icon name="play" size={32} /></span>
             <div>
-              <small>Featured case study</small>
-              <strong>Samsung Voices of Galaxy MMA</strong>
+              <small>Featured showreel</small>
+              <strong>{showreel.title}</strong>
             </div>
           </div>
-        </Link>
+        </section>
       </section>
 
       <section className="section">
@@ -428,13 +490,14 @@ function Contact() {
   );
 }
 
-function Admin({ projects, setProjects }) {
+function Admin({ projects, setProjects, showreel, setShowreel }) {
   const [authenticated, setAuthenticated] = useState(
     () => sessionStorage.getItem("dai-admin-session") === "true",
   );
   const [email, setEmail] = useState("");
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(initialProjects[0]);
+  const [showreelForm, setShowreelForm] = useState(showreel);
 
   const login = (event) => {
     event.preventDefault();
@@ -523,6 +586,24 @@ function Admin({ projects, setProjects }) {
         </div>
       </aside>
       <main className="admin-main">
+        <section className="admin-showreel">
+          <div>
+            <span className="eyebrow">Home feature</span>
+            <h2>Showreel</h2>
+            <p>Paste a YouTube URL. It will autoplay muted and loop on the Home page; visitors can unmute it from the player controls.</p>
+          </div>
+          <form
+            className="admin-showreel-form"
+            onSubmit={(event) => {
+              event.preventDefault();
+              setShowreel({ ...showreelForm, title: "Showreel" });
+            }}
+          >
+            <label>YouTube URL<input value={showreelForm.videoUrl} onChange={(e) => setShowreelForm({ ...showreelForm, videoUrl: e.target.value })} placeholder="Add later" /></label>
+            <label>Placeholder image URL<input value={showreelForm.image} onChange={(e) => setShowreelForm({ ...showreelForm, image: e.target.value })} /></label>
+            <button className="button" type="submit">Save showreel</button>
+          </form>
+        </section>
         <div className="admin-heading">
           <div><span className="eyebrow">Content library</span><h1>Projects</h1></div>
           <button className="button" onClick={newProject}><Icon name="plus" /> New project</button>
@@ -590,17 +671,18 @@ function PublicLayout({ children }) {
 
 export default function App() {
   const [projects, setProjects] = useProjects();
+  const [showreel, setShowreel] = useShowreel();
   return (
     <>
       <ScrollToTop />
       <Routes>
-        <Route path="/" element={<PublicLayout><Home projects={projects} /></PublicLayout>} />
+        <Route path="/" element={<PublicLayout><Home projects={projects} showreel={showreel} /></PublicLayout>} />
         <Route path="/work" element={<PublicLayout><Work projects={projects} /></PublicLayout>} />
         <Route path="/work/:id" element={<PublicLayout><ProjectDetail projects={projects} /></PublicLayout>} />
         <Route path="/services" element={<PublicLayout><Services /></PublicLayout>} />
         <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
         <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
-        <Route path="/admin" element={<Admin projects={projects} setProjects={setProjects} />} />
+        <Route path="/admin" element={<Admin projects={projects} setProjects={setProjects} showreel={showreel} setShowreel={setShowreel} />} />
         <Route path="*" element={<PublicLayout><NotFound /></PublicLayout>} />
       </Routes>
     </>
